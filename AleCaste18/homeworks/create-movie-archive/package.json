@@ -5,7 +5,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "sleep": "^6.3.0",
     "uuid": "^2.0.3"
   }
 }

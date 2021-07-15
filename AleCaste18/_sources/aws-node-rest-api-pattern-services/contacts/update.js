@@ -9,30 +9,31 @@ module.exports.update = (event, context, callback) => {
   const data = JSON.parse(event.body);
 
   // validation
-  if (typeof data.text !== 'string' || typeof data.checked !== 'boolean') {
+  if (typeof data.name !== 'string' || typeof data.email !== 'string') {
     console.error('Validation Failed');
     callback(null, {
       statusCode: 400,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Couldn\'t update the todo item.',
+      body: 'Couldn\'t update the contact item.',
     });
     return;
   }
 
   const params = {
-    TableName: process.env.DYN_T_TODOS,
+    TableName: process.env.DYN_T_CONTACTS,
     Key: {
       id: event.pathParameters.id,
     },
     ExpressionAttributeNames: {
-      '#todo_text': 'text',
+      '#contact_name': 'name',
+      '#contact_email': 'email',
     },
     ExpressionAttributeValues: {
-      ':text': data.text,
-      ':checked': data.checked,
+      ':name': data.name,
+      ':email': data.email,
       ':updatedAt': timestamp,
     },
-    UpdateExpression: 'SET #todo_text = :text, checked = :checked, updatedAt = :updatedAt',
+    UpdateExpression: 'SET #contact_name = :name, #contact_email = :email, updatedAt = :updatedAt',
     ReturnValues: 'ALL_NEW',
   };
 

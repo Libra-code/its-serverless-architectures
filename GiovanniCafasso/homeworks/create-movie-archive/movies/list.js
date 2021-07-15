@@ -3,11 +3,17 @@
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+
 module.exports.list = (event, context, callback) => {
 
-  const params = {
-    TableName: process.env.MOVIES_TABLE
-  };
+  sleep(5000).then(() => {
+    const params = {
+      TableName: process.env.MOVIES_TABLE
+    };
+    
   var title="";
   var director="";
   

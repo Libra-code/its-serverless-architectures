@@ -8,7 +8,8 @@ provider:
   region: eu-central-1
   profile: serverless-admin
   environment:
-    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    DYN_T_TODOS: ${self:service}-${opt:stage, self:provider.stage}-todos
+    DYN_T_CONTACTS: ${self:service}-${opt:stage, self:provider.stage}-contacts
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -18,7 +19,16 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYN_T_TODOS}"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYN_T_CONTACTS}"  
 
 functions:
   todosHandler:
@@ -44,6 +54,30 @@ functions:
           path: todos/{id}
           method: delete
           cors: true
+  contactsHandler:
+    handler: contacts/handler.contactshandler
+    events:
+      - http:
+          path: contacts
+          method: post
+          cors: true
+      - http:
+          path: contacts
+          method: get
+          cors: true
+      - http:
+          path: contacts/{id}
+          method: get
+          cors: true
+      - http:
+          path: contacts/{id}
+          method: put
+          cors: true          
+      - http:
+          path: contacts/{id}
+          method: delete
+          cors: true
+
 
 resources:
   Resources:
@@ -62,4 +96,20 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        TableName: ${self:provider.environment.DYN_T_TODOS}
+    ContactsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYN_T_CONTACTS}   

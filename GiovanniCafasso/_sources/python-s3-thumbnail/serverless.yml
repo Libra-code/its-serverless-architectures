@@ -1,0 +1,38 @@
+service: python-s3-thumbnail
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: python2.7
+  region: us-east-1
+  profile: serverless-admin
+  timeout: 10
+  memorySize: 128
+  iamRoleStatements:
+   - Effect: "Allow"
+     Action:
+       - "s3:*"
+     Resource: "*"
+  environment:
+     THUMBNAIL_SIZE: "128"  #variabile d'ambiente
+
+custom:
+  bucket: gabri-s3-thumbnail-generator
+  pythonRequirements:
+   dockerizePip: true
+
+functions:
+  s3-thumbnail-generator: #nome che avrà la funzione su AWS
+    handler: handler.s3_thumbnail_generator
+    events:   #possono esserci più event
+      - s3:   #s3 scatena la funzione, non api gateway
+          bucket: ${self:custom.bucket}  #gabri-s3-thumbnail-generator => è il nome del bucket
+          event: s3:ObjectCreated:*
+          rules:
+            - suffix: .png  #aggiunge suffisso .png
+
+plugins:
+  - serverless-python-requirements

@@ -1,14 +1,14 @@
-service: serverless-rest-api-with-dynamodb
+service: film-collection-manager
 
-frameworkVersion: ">=1.1.0"
+frameworkVersion: ">=1.1.0 <2.44.0"
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
   region: us-east-1
   profile: serverless-admin
   environment:
-    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    MOVIES_TABLE: ${self:service}-${opt:stage, self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -18,52 +18,52 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MOVIES_TABLE}"
 
 functions:
   create:
-    handler: todos/create.create
+    handler: movies/create.create
     events:
       - http:
-          path: todos
+          path: movies
           method: post
           cors: true
 
   list:
-    handler: todos/list.list
+    handler: movies/list.list
     events:
       - http:
-          path: todos
+          path: movies
           method: get
           cors: true
-
+  
   get:
-    handler: todos/get.get
+    handler: movies/get.get
     events:
       - http:
-          path: todos/{id}
+          path: movies/{id}
           method: get
           cors: true
 
   update:
-    handler: todos/update.update
+    handler: movies/update.update
     events:
       - http:
-          path: todos/{id}
+          path: movies/{id}
           method: put
           cors: true
 
   delete:
-    handler: todos/delete.delete
+    handler: movies/delete.delete
     events:
       - http:
-          path: todos/{id}
+          path: movies/{id}
           method: delete
           cors: true
 
 resources:
   Resources:
-    TodosDynamoDbTable:
+    moviesDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
       DeletionPolicy: Retain
       Properties:
@@ -78,4 +78,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        TableName: ${self:provider.environment.MOVIES_TABLE}

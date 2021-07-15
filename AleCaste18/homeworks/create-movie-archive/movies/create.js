@@ -2,28 +2,34 @@
 
 const uuid = require('uuid');
 const AWS = require('aws-sdk'); // eslint-disable-line import/no-extraneous-dependencies
-
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 module.exports.create = (event, context, callback) => {
   const timestamp = new Date().getTime();
+
   const data = JSON.parse(event.body);
-  if (typeof data.text !== 'string') {
+
+  if (typeof data.title !== 'string' || typeof data.duration !== 'number' || typeof data.director !== 'string') {
     console.error('Validation Failed');
+    console.error(typeof data.duration);
     callback(null, {
-      statusCode: 400,
+      statusCode: 422,
       headers: { 'Content-Type': 'text/plain' },
-      body: 'Couldn\'t create the todo item.',
+      body: 'Couldn\'t create the film.',
     });
     return;
   }
 
+  const { title, duration, director } = data;
+
   const params = {
-    TableName: process.env.DYN_T_TODOS,
+    TableName: process.env.MOVIES_TABLE,
     Item: {
       id: uuid.v1(),
-      text: data.text,
-      checked: false,
+      title,
+      director,
+      duration,
+      watched: false,
       createdAt: timestamp,
       updatedAt: timestamp,
     },
